@@ -15,9 +15,8 @@ Building
       * In the Location field, click Browse... and select the <project_root> directory.
       * Click Finish.
    * On the command line:
-      * Change to the <project_root> directory
-      * Run the following command to generate a build.xml file:
 
+                cd <project_root>
                 android update project -p . -s
 
 2. Compile the native code using the ndk-build command.
@@ -26,10 +25,8 @@ Building
                 ndk-build NDK_MODULE_PATH=./jni
 
 3. Build and install the application as you would a normal Android application. 
-
    * If you are using Eclipse:
        * Run the application to build and install it on a device.
-
    * If you are using Ant:
        * Run the following commands from the project directory:
 
