@@ -16,14 +16,13 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    = hello-jni
+LOCAL_MODULE    = hello-freeglut
 
 LOCAL_CFLAGS    := -DFREEGLUT_GLES2
 LOCAL_CPPFLAGS    := -DFREEGLUT_GLES2
 
-#LOCAL_WHOLE_STATIC_LIBRARIES := freeglut-gles2
 LOCAL_STATIC_LIBRARIES := freeglut-gles2
-LOCAL_SRC_FILES := hello-jni.c
+LOCAL_SRC_FILES := hellofreeglut.c
 LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)
