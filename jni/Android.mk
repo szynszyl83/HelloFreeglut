@@ -23,7 +23,7 @@ LOCAL_CPPFLAGS  := -DFREEGLUT_GLES2
 LOCAL_CPPFLAGS  += -fexceptions
 
 LOCAL_STATIC_LIBRARIES := freeglut-gles2
-LOCAL_SRC_FILES += hellofreeglut.cpp
+LOCAL_SRC_FILES += hello-freeglut.cpp
 LOCAL_SRC_FILES += Utils.cpp
 LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2
 
