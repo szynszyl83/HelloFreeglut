@@ -29,4 +29,5 @@ LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)
 
+$(call import-add-path,$(LOCAL_PATH))
 $(call import-module,freeglut-gles2)
