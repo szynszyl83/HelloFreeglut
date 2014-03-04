@@ -20,6 +20,9 @@
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data android:name="android.app.lib_name"
                     android:value="hello-freeglut" />
+            <!-- Override func name, so we can hook in before freeglut does -->
+            <meta-data android:name="android.app.func_name"
+                    android:value="ANativeActivity_onCreate_Mine" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

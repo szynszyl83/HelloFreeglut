@@ -4,14 +4,25 @@
 #include <GL/freeglut.h>
 #include <GLES2/gl2.h>
 #include <android/log.h>
-
-#include "Utils.h"
-
-static float gAspectRatio;
+#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "hello-freeglut", __VA_ARGS__))
+#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "hello-freeglut", __VA_ARGS__))
+#include <android/native_activity.h>
+#include <android/sensor.h>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+
+#include "Utils.h"
+
+static ANativeActivity* gActivity = 0;
+static float gAspectRatio;
+GLuint gProgramID = 0;
+GLuint gBufferID = 0;
+GLuint gModelMatrixUniform = 0;
+GLuint gCameraViewMatrixUniform = 0;
+glm::mat4 gModelMatrix;
+glm::mat4 gCameraViewMatrix;
 
 struct Vertex
 {
@@ -41,13 +52,6 @@ const char* fragShaderText =
 			"{\n"
 			"   gl_FragColor = v_color;\n"
 			"}\n";
-
-GLuint gProgramID = 0;
-GLuint gBufferID = 0;
-GLuint gModelMatrixUniform = 0;
-GLuint gCameraViewMatrixUniform = 0;
-glm::mat4 gModelMatrix;
-glm::mat4 gCameraViewMatrix;
 
 void initializeCamera() {
 	gCameraViewMatrix = glm::ortho(-gAspectRatio, gAspectRatio, 1.0f, -1.0f);
@@ -132,8 +136,77 @@ static void callbackIdle(void) {
 	glutPostRedisplay();
 }
 
+static void callbackAppStatus(int status) {
+	LOGI("callbackAppStatus; status=%d", status);
+	if (status & GLUT_APPSTATUS_PAUSE) {
 
+	} else if (status & GLUT_APPSTATUS_RESUME) {
+
+	}
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+/**
+ * Hook to mess around with freeglut's callbacks (if needed). By adding
+ * android.app.func_name metadata entry to AndroidManifest we've forced
+ * NativeActivity to use this function as callback setting entry-point, instead
+ * of a default one (which is provided by freeglut)
+ *
+ * @param activity
+ * @param savedState
+ * @param savedStateSize
+ */
+void ANativeActivity_onCreate_Mine(ANativeActivity* activity, void* savedState,
+		size_t savedStateSize) {
+	/* Call freeglut's implementation of onCreate */
+	::ANativeActivity_onCreate(activity, savedState, savedStateSize);
+
+	/* Mess around with callbacks installed by freeglut HERE */
+
+	/* Store ANativeActivity - to be used when needed */
+	gActivity = activity;
+}
+#ifdef __cplusplus
+};
+#endif
+
+/**
+ * Forces screen to stay ON for the whole time we're visible
+ *
+ * @param activity
+ */
+static void forceScreenOn(ANativeActivity* activity) {
+	JNIEnv* env = 0;
+	JavaVM* jvm = activity->vm;
+
+	jvm->AttachCurrentThread(&env, NULL);
+	jclass clazz_activity = env->GetObjectClass(activity->clazz);
+	jmethodID method_getWin = env->GetMethodID(clazz_activity, "getWindow", "()Landroid/view/Window;");
+	jobject winObj = env->CallObjectMethod(activity->clazz, method_getWin);
+
+	jclass clazz_win = env->GetObjectClass(winObj);
+	jmethodID method_addFlags = env->GetMethodID(clazz_win, "addFlags", "(I)V");
+	env->CallObjectMethod(winObj, method_addFlags, 0x80); // FLAG_KEEP_SCREEN_ON
+
+	if (env->ExceptionOccurred()) {
+		env->ExceptionDescribe();
+		env->ExceptionClear();
+	}
+
+	jvm->DetachCurrentThread();
+}
+
+/**
+ * This method get's called by freeglut from android_main()
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main(int argc, char *argv[]) {
+	forceScreenOn(gActivity);
+
 	glutInitWindowSize(640,480);
 	gAspectRatio = 640.0f/480.0f;
 	glutInitWindowPosition(40,40);
@@ -148,8 +221,10 @@ int main(int argc, char *argv[]) {
 	glutDisplayFunc( callbackDisplay );
 	glutReshapeFunc( callbackResize );
 	glutInitContextFunc( callbackInitContext );
+	glutAppStatusFunc( callbackAppStatus );
 
 	glutMainLoop();
 
 	return EXIT_SUCCESS;
 }
+
