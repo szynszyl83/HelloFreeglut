@@ -98,15 +98,19 @@ void drawModel() {
 }
 
 static void callbackInitContext() {
+	glutInitContextFlags(GLUT_CORE_PROFILE);
+	gles::assertNoError();
+
 	float r = (float)rand() / (float)RAND_MAX;
 	float g = (float)rand() / (float)RAND_MAX;
 	float b = (float)rand() / (float)RAND_MAX;
 	glClearColor(r, g, b, 1.0f);
-
-	glutInitContextFlags(GLUT_CORE_PROFILE);
+	gles::assertNoError();
 
 	initializeModel();
 	initializeCamera();
+
+	gles::assertNoError();
 }
 
 static void callbackDisplay() {
