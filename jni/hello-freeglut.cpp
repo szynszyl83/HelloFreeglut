@@ -188,7 +188,7 @@ static void forceScreenOn(ANativeActivity* activity) {
 
 	jclass clazz_win = env->GetObjectClass(winObj);
 	jmethodID method_addFlags = env->GetMethodID(clazz_win, "addFlags", "(I)V");
-	env->CallObjectMethod(winObj, method_addFlags, 0x80); // FLAG_KEEP_SCREEN_ON
+	env->CallVoidMethod(winObj, method_addFlags, 0x80); // FLAG_KEEP_SCREEN_ON
 
 	if (env->ExceptionOccurred()) {
 		env->ExceptionDescribe();
